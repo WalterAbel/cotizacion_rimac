@@ -1,0 +1,36 @@
+service: cotizacion
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    DYNAMODB_TABLE: cotizaciones
+
+plugins:
+  - serverless-offline
+
+resources:
+  Resources:
+    cotizacionesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+functions:
+  api:
+    handler: dist/serverless.handler
+    events:
+      - http:
+          method: ANY
+          path: salud/{proxy+}
+          cors: true
